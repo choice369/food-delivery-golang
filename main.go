@@ -4,17 +4,21 @@ import (
 	"log"
 	"os"
 
-	"food_delivery/modules/user/transport/ginuser"
+	"food_delivery/skio"
+
+	"food_delivery/subscriber"
+
+	"food_delivery/pubsub/local_pubsub"
+
+	adminroutes "food_delivery/routes/admin"
+	restaurantsroutes "food_delivery/routes/restaurants"
+	userroutes "food_delivery/routes/user"
 
 	"food_delivery/component/upload_provider"
-
-	"food_delivery/modules/upload/transport/ginupload"
 
 	"food_delivery/middlewares"
 
 	"food_delivery/component/appctx"
-
-	"food_delivery/modules/restaurant/transport/ginrestaurant"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -39,6 +43,8 @@ func main() {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	db = db.Debug()
 
+	ps := local_pubsub.NewLocalPubSub()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,50 +54,23 @@ func main() {
 
 	r.Static("/static", "./static")
 
-	appContext := appctx.NewAppContext(db, s3Provider, secretKey)
+	appContext := appctx.NewAppContext(db, s3Provider, secretKey, ps)
+
+	//subscriber.Setup(appContext, context.Background())
+	subscriber.NewEngine(appContext).Start()
 
 	v1 := r.Group("/v1", middlewares.Recover(appContext))
 
-	v1.POST("/restaurant", ginrestaurant.CreateRestaurant(appContext))
+	restaurantsroutes.SetupRestaurantsRoutes(appContext, v1)
 
-	v1.POST("upload", ginupload.UploadImage(appContext))
+	userroutes.SetupUserRoutes(appContext, v1)
 
-	v1.POST("register", ginuser.Register(appContext))
+	adminroutes.SetupAdminRoutes(appContext, v1)
 
-	v1.POST("authentication", ginuser.Login(appContext))
+	rtEngine := skio.NewEngine()
+	appContext.SetRealtimeEngine(rtEngine)
 
-	v1.GET("/profile", middlewares.RequireAuth(appContext), ginuser.Profile(appContext))
-
-	//v1.GET("/restaurants/:id", func(c *gin.Context) {
-	//	id, err := strconv.Atoi(c.Param("id"))
-	//	if err != nil {
-	//		c.JSON(http.StatusBadRequest, gin.H{
-	//			"error": err.Error(),
-	//		})
-	//	}
-	//	var restaurant Restaurant
-	//
-	//	db.Where("id = ?", id).First(&restaurant)
-	//	c.JSON(http.StatusOK, gin.H{
-	//		"data": restaurant,
-	//	})
-	//})
-
-	v1.GET("/restaurants", ginrestaurant.ListRestaurant(appContext))
-
-	//v1.PATCH("/restaurants/:id", func(c *gin.Context) {
-	//	var data RestaurantUpdate
-	//	if err := c.ShouldBind(&data); err != nil {
-	//		c.JSON(http.StatusBadRequest, gin.H{
-	//			"error": err.Error(),
-	//		})
-	//		return
-	//	}
-	//
-	//	db.Where("id = ?", data.OwnerId).Updates(&data)
-	//})
-
-	v1.DELETE("/restaurants/:id", ginrestaurant.DeleteRestaurant(appContext))
+	rtEngine.Run(appContext, r)
 
 	r.Run()
 }

@@ -27,6 +27,10 @@ func (s *sqlStore) ListDataWithCondition(ctx context.Context, filter *restaurant
 		return result, err
 	}
 
+	for i := range moreKey {
+		db = db.Preload(moreKey[i])
+	}
+
 	if v := paging.FakeCursor; v != "" {
 		uid, err := common.FromBase58(v)
 		if err != nil {

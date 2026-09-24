@@ -11,6 +11,16 @@ const (
 	CurrentUser = "user"
 )
 
+const (
+	TopicUserLikeRestaurant = "TopicUserLikeRestaurant"
+)
+
+type Requester interface {
+	GetUserId() int
+	GetEmail() string
+	GetRole() string
+}
+
 func AppRecover() {
 	if err := recover(); err != nil {
 		log.Panicln("Recover Error:", err)

@@ -1,0 +1,120 @@
+1. If you want to scale ur search, so can do index for what the things that search too much, and it trade-off that
+the tree must build again for switching or arrange something.
+
+2. If user login so much in many device, u can take the last of the jwt and saving database and limit with 3 login
+
+3. O.Auth 2 is that permission user check entirely something u wanna be, for example if u login with google, so it can
+text u a web that u can permission accepting or dis. User will not carry password for app
+OAuth 2
+├── new authorization code
+├── switching code to take access token
+├── using access token to call API
+└── using refresh token to take new access_token
+
+4. Paing by cursor method, this shit have in src code at list API
+
+5. Preload in gorm
+type User struct {
+    ID     int `gorm:"primaryKey"`
+    Name   string
+    Email  string
+    Age    int
+
+    Orders []Order
+}
+
+type Order struct {
+    ID     int `gorm:"primaryKey"`
+    UserID int
+    Amount float64
+}
+
+Preload("Order").Find(&user)
+=> This shit can be done by flowing
+Step 1: User has []Order => User has many Order => this relationship is one to many
+Step 2: With Order table that scan and find UserID, why? the struct is User and having ID => it will association UserID
+so that match with the struct Order
+Step 3:
+Relationship: User has many Orders
+
+Primary key bên User:
+    User.ID
+
+Foreign key bên Order:
+    Order.UserID
+Step 4:
+- Select * from users
+- Select * from orders where user_id in (the data from users)
+
+6. Database
+
+query -> buffer -> database
+
+7. PORT
+
+8. Callback with setTimeOut
+function foo() {
+    setTimeout(() => {
+        console.log("B");
+    }, 1000);
+}
+
+foo();
+
+Thời điểm setTimeout() vừa chạy
+Call Stack                 Timer
+┌─────────┐               ┌─────────────────┐
+│ foo()   │               │ callback        │
+└─────────┘               │ wait 1000ms     │
+                          └─────────────────┘
+
+foo() kết thúc:
+
+Call Stack                 Timer
+──────────                 ┌─────────────────┐
+  trống                    │ callback        │
+                           │ wait...         │
+                           └─────────────────┘
+
+Sau 1 giây:
+
+Timer
+  │
+  ▼
+Callback Queue
+┌─────────────┐
+│ callback()  │
+└─────────────┘
+
+Event Loop thấy:
+
+Call Stack = trống
+
+thì lấy callback:
+
+Callback Queue
+      │
+      ▼
+Call Stack
+
+┌─────────────┐
+│ callback()  │
+└─────────────┘
+
+Sau khi callback chạy xong:
+
+Call Stack
+──────────
+trống
+
+9. Meaning of something
+- 9.1 Replication
+- 9.2 Elasticsearch
+- 9.3 Vitex
+- 9.4 Sharding table, sharding ngang and doc
+- 9.5 KONG for api gateway
+- 9.6 Envoy rate limit
+- 9.7 Pubsub golang
+
+Tool: blueprint, nefdata, ELK, pion webrtc, webrtc, ffmpeg, cdn, wowza, cloudinary, m3u8, nginx stream rtmp, imgix,
+fosite for golang, keycloak, firebase, max ide connection, timeout ide connection

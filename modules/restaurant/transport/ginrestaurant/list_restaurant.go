@@ -3,6 +3,8 @@ package ginrestaurant
 import (
 	"net/http"
 
+	restaurant_repository "food_delivery/modules/restaurant/repository"
+
 	restaurantbiz "food_delivery/modules/restaurant/biz"
 	restaurantstorage "food_delivery/modules/restaurant/storage"
 
@@ -35,7 +37,9 @@ func ListRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 		var result []restaurantmodel.Restaurant
 
 		store := restaurantstorage.NewSqlStore(db)
-		biz := restaurantbiz.NewListRestaurantBiz(store)
+		//likeStore := restaurant_like_storage.NewSqlStore(db)
+		repo := restaurant_repository.NewListRestaurantRepo(store)
+		biz := restaurantbiz.NewListRestaurantBiz(repo)
 
 		result, err := biz.ListRestaurant(c.Request.Context(), &filter, &pagingData)
 		if err != nil {

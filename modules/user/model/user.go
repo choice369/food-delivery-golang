@@ -26,6 +26,11 @@ func (User) TableName() string {
 
 func (u *User) Mask(isAdmin bool) {
 	u.GenUID(common.DbTypeUser)
+
+	if !isAdmin {
+		u.Phone = ""
+		u.Email = ""
+	}
 }
 
 func (u *User) GetUserId() int {

@@ -9,7 +9,7 @@ import (
 )
 
 type CreateRestaurantStore interface {
-	CreateRestaurant(ctx context.Context, data *restaurantmodel.RestaurantCreate) error
+	Create(ctx context.Context, data *restaurantmodel.RestaurantCreate) error
 }
 
 type createRestaurantBiz struct {
@@ -25,7 +25,7 @@ func (biz *createRestaurantBiz) CreateRestaurant(ctx context.Context, data *rest
 		return common.ErrInvalidRequest(err)
 	}
 
-	if err := biz.store.CreateRestaurant(ctx, data); err != nil {
+	if err := biz.store.Create(ctx, data); err != nil {
 		return common.ErrCannotCreateEntity(restaurantmodel.EntityName, err)
 	}
 	return nil

@@ -34,7 +34,7 @@ func extractTokenFromHeaderString(s string) (string, error) {
 	return parts[1], nil
 }
 
-func RequireAuth(appCtx appctx.AppContext) func(*gin.Context) {
+func RequireAuthen(appCtx appctx.AppContext) func(*gin.Context) {
 	tokenProvider := jwt.NewTokenJWTProvider(appCtx.SecretKey())
 	return func(c *gin.Context) {
 		token, err := extractTokenFromHeaderString(c.GetHeader("Authorization"))
